@@ -216,26 +216,30 @@ fn segmented_sum_region(
     let mut is_composite = BitField::new(segment_size.get());
 
     while low <= high_end {
-        let high = (low + segment_size.get() - 1).min(high_end);
-        let len = high - low + 1;
+        let high = (low + 2 * (segment_size.get() - 1)).min(high_end);
+        let len = (high - low) / 2 + 1;
         is_composite.reset(len);
 
         for &prime in base_primes {
-            let start = low.div_ceil(prime).max(prime) * prime;
+            // first odd multiple of prime that is >= low and >= pripe * pripe
+            let mut start = low.div_ceil(prime).max(prime) * prime;
+            if start % 2 == 0 {
+                start += prime; // keep start odd
+            }
 
             let mut multiple = start;
             while multiple <= high {
-                is_composite.set(multiple - low, true);
-                multiple += prime;
+                is_composite.set((multiple - low) / 2, true);
+                multiple += 2 * prime; // set by 2*prime to stay odd
             }
         }
 
         total += (0..len)
             .filter(|&i| !is_composite.get(i))
-            .map(|i| low + i)
+            .map(|i| low + 2 * i)
             .sum::<usize>();
 
-        low += segment_size.get();
+        low += 2 * segment_size.get();
     }
 
     total
@@ -272,7 +276,9 @@ fn segmented_sum_parellel(
 
         while low <= num.get() {
             let high = (low + per_thread - 1).min(num.get());
-            let base_primes_ref = &base_primes;
+
+            // don't include 2, so that it start odd. 2 already present in base primes
+            let base_primes_ref = &base_primes[1..];
             handles.push(
                 scope.spawn(move || segmented_sum_region(low, high, segment_size, base_primes_ref)),
             );
