@@ -123,7 +123,7 @@ impl BitField {
     fn reset(&mut self, new_len: usize) {
         let words_needed = new_len.div_ceil(64);
         if self.data.len() < words_needed {
-            self.data.resize(words_needed, 0)
+            self.data.resize(words_needed, 0);
         } else {
             self.data[..words_needed].fill(0);
         }
@@ -264,11 +264,13 @@ fn segmented_sum_parellel(
         .sum();
 
     let region_start = sqrt_num + 1;
+    let region_start = region_start | 1; // round up to odd
     if region_start > num.get() {
         return total;
     }
     let region_len = num.get() - region_start + 1;
     let per_thread = region_len.div_ceil(num_threads.get());
+    let per_thread = (per_thread + 1) & !1; // round up to even
 
     let region_sums: Vec<usize> = thread::scope(|scope| {
         let mut handles = Vec::new();
