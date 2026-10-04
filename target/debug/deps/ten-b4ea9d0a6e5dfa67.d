@@ -5,5 +5,5 @@
 src/main.rs:
 Cargo.toml:
 
-# env-dep:CLIPPY_ARGS=-W__CLIPPY_HACKERY__clippy::pedantic__CLIPPY_HACKERY__
+# env-dep:CLIPPY_ARGS=-W__CLIPPY_HACKERY__clippy::pedantic__CLIPPY_HACKERY__-A__CLIPPY_HACKERY__clippy::inline_always__CLIPPY_HACKERY__
 # env-dep:CLIPPY_CONF_DIR
